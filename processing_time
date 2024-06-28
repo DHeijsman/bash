@@ -1,0 +1,23 @@
+while read LINE; do {
+
+  #Get dates/times:
+  TEMP_DATE_1=`date -r started_$LINE.txt`
+  TEMP_DATE_2=`date -r done_$LINE.txt`
+
+  #Calculate difference in seconds:
+  TEMP_DIFFERENCE=`echo $(( $(date -d "$TEMP_DATE_2" "+%s") - $(date -d "$TEMP_DATE_1" "+%s") ))`
+
+  #Get difference in minutes:
+  TIMEINMIN=`echo "scale=2 ; $TEMP_DIFFERENCE/60" | bc`
+
+  #Get filesize:
+  TEMP_FILESIZE=`stat -c%s output${LINE}.vcf.gz | awk '{ split( "B KB MB GB TB PB" , v ); s=1; while( $1>1024 ){ $1/=1024; s++ } printf "%.2f %s", $1, v[s] }'`
+
+  #Report results:
+  echo -e -n $LINE >> processing_time.txt
+  echo -e -n ' \t' >> processing_time.txt
+  echo -e -n $TIMEINMIN >> processing_time.txt
+  echo -e -n ' \t' >> processing_time.txt
+  echo $TEMP_FILESIZE >> processing_time.txt
+
+} done < 792_samples_fractienr.txt
